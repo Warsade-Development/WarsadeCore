@@ -124,7 +124,7 @@ public abstract class PaginatedMenu<T, K> extends PaginatedView<T> implements Me
                 });
     }
 
-    abstract ItemStack getViewItemStack(T value);
+    public abstract ItemStack getViewItemStack(T value);
 
     public MenuConfig getMenuConfig() {
         return menuConfig;

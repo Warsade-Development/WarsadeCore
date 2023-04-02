@@ -1,7 +1,9 @@
 package com.warsade.core.menu;
 
+import com.warsade.core.CorePlugin;
 import com.warsade.core.config.providers.MenuConfig;
-import com.warsade.core.menu.registry.MenuRegistry;
+import com.warsade.core.menu.context.MenuContext;
+import com.warsade.core.menu.context.MenuContextImpl;
 import com.warsade.core.menu.slot.MenuSlot;
 import com.warsade.core.menu.slot.MenuSlotClick;
 import com.warsade.core.menu.slot.impl.MenuSlotClickImpl;
@@ -12,7 +14,6 @@ import me.saiintbrisson.minecraft.ViewContext;
 import me.saiintbrisson.minecraft.ViewItem;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -23,18 +24,14 @@ import java.util.function.Consumer;
 public abstract class NormalMenu <T> extends View implements Menu<T> {
 
     MenuConfig menuConfig;
-    Plugin plugin;
-    MenuRegistry menuRegistry;
 
     public NormalMenu() {}
 
-    public NormalMenu(MenuConfig menuConfig, Plugin plugin, MenuRegistry menuRegistry) {
+    public NormalMenu(MenuConfig menuConfig) {
         super(menuConfig.getRows(), menuConfig.getName());
         setCancelOnClick(true);
 
         this.menuConfig = menuConfig;
-        this.plugin = plugin;
-        this.menuRegistry = menuRegistry;
     }
 
     @Override
@@ -43,24 +40,38 @@ public abstract class NormalMenu <T> extends View implements Menu<T> {
     }
 
     @Override
-    public abstract void openInventory(Player player, T data);
-
-    @Override
-    public abstract void closeInventory(Player player);
-
-    public void openForPlayer(Player player, Consumer<ViewContext> setup) {
-        openForPlayer(player, Collections.emptyMap(), setup);
+    public void openInventory(Player player) {
+        openForPlayer(player, Collections.emptyMap(), onOpen(player, null));
     }
 
-    public void openForPlayer(Player player, Map<String, Object> data, Consumer<ViewContext> setup) {
-        menuRegistry.getViewFrameByMenuClass((Class<? extends Menu<?>>) this.getClass()).ifPresent(viewFrame -> {
+    @Override
+    public void openInventory(Player player, T data) {
+        openForPlayer(player, Collections.emptyMap(), onOpen(player, data));
+    }
+
+    @Override
+    public void openInventory(Player player, Map<String, Object> initialData, T object) {
+        openForPlayer(player, initialData, onOpen(player, object));
+    }
+
+    @Override
+    public void closeInventory(Player player) {
+        onClose(player);
+        closeForPlayer(player);
+    }
+
+    private void openForPlayer(Player player, Map<String, Object> data, Consumer<MenuContext> setup) {
+        CorePlugin.getMenuRegistry().getViewFrameByMenuClass((Class<? extends Menu<?>>) this.getClass()).ifPresent(viewFrame -> {
             data.put("setup", setup);
             viewFrame.open(this.getClass(), player, data);
         });
     }
 
+    public abstract Consumer<MenuContext> onOpen(Player player, T data);
+    public abstract void onClose(Player player);
+
     public void closeForPlayer(Player player) {
-        menuRegistry.getViewFrameByMenuClass((Class<? extends Menu<?>>) this.getClass()).ifPresent(viewFrame -> {
+        CorePlugin.getMenuRegistry().getViewFrameByMenuClass((Class<? extends Menu<?>>) this.getClass()).ifPresent(viewFrame -> {
             AbstractView view = viewFrame.get(player);
             if (view != null) view.closeUninterruptedly();
         });
@@ -72,8 +83,9 @@ public abstract class NormalMenu <T> extends View implements Menu<T> {
         setupInventory(context);
     }
 
-    private void setupInventory(ViewContext context) {
-        ((Consumer<ViewContext>) context.get("setup")).accept(context);
+    private void setupInventory(ViewContext viewContext) {
+        Consumer<MenuContext> menuContextConsumer = viewContext.get("setup");
+        menuContextConsumer.accept(new MenuContextImpl(viewContext));
     }
 
     @Override
@@ -93,7 +105,8 @@ public abstract class NormalMenu <T> extends View implements Menu<T> {
     }
 
     @Override
-    public void attachSlot(MenuSlot menuSlot, ViewContext viewContext) {
+    public void attachSlot(MenuSlot menuSlot, MenuContext menuContext) {
+        ViewContext viewContext = menuContext.getViewContext();
         viewContext.slot(menuSlot.getSlot(), menuSlot.getItem()).onClick(viewSlotClickContext -> {
             MenuSlotClick menuSlotClick = new MenuSlotClickImpl(viewSlotClickContext.getPlayer(), viewSlotClickContext.getCurrentItem().asBukkitItem(), viewSlotClickContext.getSlot());
             if (menuSlot.getClickAction() != null) menuSlot.getClickAction().accept(menuSlotClick);
@@ -102,10 +115,6 @@ public abstract class NormalMenu <T> extends View implements Menu<T> {
 
     public MenuConfig getMenuConfig() {
         return menuConfig;
-    }
-
-    public Plugin getPlugin() {
-        return plugin;
     }
 
 }

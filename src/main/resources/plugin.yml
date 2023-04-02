@@ -1,0 +1,4 @@
+name: WarsadeCore
+version: 1.0.0
+main: com.warsade.core.Core
+author: Gabileti

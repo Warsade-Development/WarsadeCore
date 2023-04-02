@@ -45,7 +45,7 @@ public abstract class Command extends org.bukkit.command.Command implements Comm
 
     public abstract List<CommandArgument> getArguments();
     public abstract boolean onExecute(CommandSender sender, String[] args);
-    public abstract void onErrorResponse(String errorMessage);
+    public abstract void onErrorResponse(CommandSender sender, String[] args, String errorMessage);
 
     public Plugin getPlugin() {
         return plugin;

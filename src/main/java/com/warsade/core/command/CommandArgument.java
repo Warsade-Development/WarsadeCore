@@ -31,7 +31,7 @@ public abstract class CommandArgument {
         boolean meetRequirements = requirementsCheckResult.getFirst();
         String errorMessage = requirementsCheckResult.getSecond();
         if (!meetRequirements) {
-            command.onErrorResponse(errorMessage);
+            command.onErrorResponse(sender, args, errorMessage);
             return false;
         }
 

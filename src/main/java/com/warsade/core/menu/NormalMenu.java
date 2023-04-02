@@ -17,8 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
 public abstract class NormalMenu <T> extends View implements Menu<T> {
@@ -41,41 +40,35 @@ public abstract class NormalMenu <T> extends View implements Menu<T> {
 
     @Override
     public void openInventory(Player player) {
-        openForPlayer(player, Collections.emptyMap(), onOpen(player, null));
+        openInventory(player, null);
     }
 
     @Override
     public void openInventory(Player player, T data) {
-        openForPlayer(player, Collections.emptyMap(), onOpen(player, data));
+        openInventory(player, new HashMap<>(), data);
     }
 
     @Override
-    public void openInventory(Player player, Map<String, Object> initialData, T object) {
-        openForPlayer(player, initialData, onOpen(player, object));
+    public void openInventory(Player player, HashMap<String, Object> initialData, T object) {
+        initialData.put("object", object);
+
+        CorePlugin.getMenuRegistry().getViewFrameByMenuClass((Class<? extends Menu<?>>) this.getClass()).ifPresent(viewFrame -> {
+            viewFrame.open(this.getClass(), player, initialData);
+        });
     }
 
     @Override
     public void closeInventory(Player player) {
         onClose(player);
-        closeForPlayer(player);
-    }
 
-    private void openForPlayer(Player player, Map<String, Object> data, Consumer<MenuContext> setup) {
-        CorePlugin.getMenuRegistry().getViewFrameByMenuClass((Class<? extends Menu<?>>) this.getClass()).ifPresent(viewFrame -> {
-            data.put("setup", setup);
-            viewFrame.open(this.getClass(), player, data);
-        });
-    }
-
-    public abstract Consumer<MenuContext> onOpen(Player player, T data);
-    public abstract void onClose(Player player);
-
-    public void closeForPlayer(Player player) {
         CorePlugin.getMenuRegistry().getViewFrameByMenuClass((Class<? extends Menu<?>>) this.getClass()).ifPresent(viewFrame -> {
             AbstractView view = viewFrame.get(player);
             if (view != null) view.closeUninterruptedly();
         });
     }
+
+    public abstract Consumer<MenuContext> onOpen(Player player, T data);
+    public abstract void onClose(Player player);
 
     @Override
     protected void onRender(@NotNull ViewContext context) {
@@ -84,7 +77,8 @@ public abstract class NormalMenu <T> extends View implements Menu<T> {
     }
 
     private void setupInventory(ViewContext viewContext) {
-        Consumer<MenuContext> menuContextConsumer = viewContext.get("setup");
+        T data = viewContext.get("object");
+        Consumer<MenuContext> menuContextConsumer = onOpen(viewContext.getPlayer(), data);
         menuContextConsumer.accept(new MenuContextImpl(viewContext));
     }
 

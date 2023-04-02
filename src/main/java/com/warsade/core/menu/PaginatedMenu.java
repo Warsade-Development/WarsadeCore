@@ -33,7 +33,6 @@ public abstract class PaginatedMenu<T, K> extends PaginatedView<T> implements Me
             if (!context.hasPreviousPage()) return;
 
             menuConfig.getItems().stream().filter(itemSchema -> itemSchema.getKey().equalsIgnoreCase("previous")).findFirst().ifPresent(itemSchema -> {
-                viewItem.withSlot(1);
                 viewItem.withItem(itemSchema.toItemStack());
             });
         });
@@ -41,7 +40,6 @@ public abstract class PaginatedMenu<T, K> extends PaginatedView<T> implements Me
             if (!context.hasNextPage()) return;
 
             menuConfig.getItems().stream().filter(itemSchema -> itemSchema.getKey().equalsIgnoreCase("next")).findFirst().ifPresent(itemSchema -> {
-                viewItem.withSlot(2);
                 viewItem.withItem(itemSchema.toItemStack());
             });
         });
@@ -55,47 +53,35 @@ public abstract class PaginatedMenu<T, K> extends PaginatedView<T> implements Me
 
     @Override
     public void openInventory(Player player) {
-        openForPlayer(player, getItems(player, null), onOpen(player, null));
+        openInventory(player, null);
     }
 
     @Override
     public void openInventory(Player player, K data) {
-        openForPlayer(player, getItems(player, data), onOpen(player, data));
+        openInventory(player, new HashMap<>(), data);
     }
 
     @Override
-    public void openInventory(Player player, Map<String, Object> initialData, K object) {
-        openForPlayer(player, initialData, getItems(player, object), onOpen(player, object));
+    public void openInventory(Player player, HashMap<String, Object> initialData, K object) {
+        initialData.put("object", object);
+
+        CorePlugin.getMenuRegistry().getViewFrameByMenuClass((Class<? extends Menu<?>>) this.getClass()).ifPresent(viewFrame -> {
+            viewFrame.open(this.getClass(), player, initialData);
+        });
     }
 
     @Override
     public void closeInventory(Player player) {
         onClose(player);
-        closeForPlayer(player);
-    }
 
-    public abstract Consumer<MenuContext> onOpen(Player player, K data);
-    public abstract void onClose(Player player);
-
-    private void openForPlayer(Player player, List<T> items, Consumer<MenuContext> setup) {
-        openForPlayer(player, Collections.emptyMap(), items, setup);
-    }
-
-    private void openForPlayer(Player player, Map<String, Object> data, List<T> items, Consumer<MenuContext> setup) {
-        CorePlugin.getMenuRegistry().getViewFrameByMenuClass((Class<? extends Menu<?>>) this.getClass()).ifPresent(viewFrame -> {
-            data.put("data", items);
-            data.put("setup", setup);
-
-            viewFrame.open(this.getClass(), player, data);
-        });
-    }
-
-    private void closeForPlayer(Player player) {
         CorePlugin.getMenuRegistry().getViewFrameByMenuClass((Class<? extends Menu<?>>) this.getClass()).ifPresent(viewFrame -> {
             AbstractView view = viewFrame.get(player);
             if (view != null) view.closeUninterruptedly();
         });
     }
+
+    public abstract Consumer<MenuContext> onOpen(Player player, K data);
+    public abstract void onClose(Player player);
 
     @Override
     public MenuSlot getSlot(int slot) {
@@ -125,9 +111,10 @@ public abstract class PaginatedMenu<T, K> extends PaginatedView<T> implements Me
     @Override
     protected void onRender(@NotNull ViewContext viewContext) {
         super.onRender(viewContext);
-        viewContext.paginated().setSource((List<?>) viewContext.get("data"));
+        K data = viewContext.get("object");
+        Consumer<MenuContext> menuContextConsumer = onOpen(viewContext.getPlayer(), data);
 
-        Consumer<MenuContext> menuContextConsumer = viewContext.get("setup");
+        viewContext.paginated().setSource(getItems(viewContext.getPlayer(), data));
         menuContextConsumer.accept(new MenuContextImpl(viewContext));
     }
 

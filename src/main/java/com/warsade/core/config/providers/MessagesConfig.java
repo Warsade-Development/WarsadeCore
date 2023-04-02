@@ -1,6 +1,7 @@
 package com.warsade.core.config.providers;
 
 import com.warsade.core.config.Config;
+import com.warsade.core.utils.MessageUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,11 +15,11 @@ public class MessagesConfig {
     }
 
     public String getMessage(String message) {
-        return langConfig.get().getString("Messages." + message);
+        return MessageUtils.replaceColor(langConfig.get().getString("Messages." + message));
     }
 
     public List<String> getMessageList(String message) {
-        return new ArrayList<>(langConfig.get().getStringList("Messages." + message));
+        return MessageUtils.replaceColor(new ArrayList<>(langConfig.get().getStringList("Messages." + message)));
     }
 
 }

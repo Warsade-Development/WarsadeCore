@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public abstract class Command extends org.bukkit.command.Command implements CommandExecutor {
 
@@ -33,10 +34,10 @@ public abstract class Command extends org.bukkit.command.Command implements Comm
         else {
             List<CommandArgument> arguments = getArguments();
             if (arguments.size() > 0) {
-                arguments.stream()
+                Optional<CommandArgument> foundArgument = arguments.stream()
                         .filter(argument -> argument.getArgumentName().equalsIgnoreCase(args[0]))
-                        .findFirst()
-                        .ifPresent(argument -> argument.execute(sender, args));
+                        .findFirst();
+                return foundArgument.map(argument -> argument.execute(sender, args, this)).orElseGet(() -> onExecute(sender, args));
             }
         }
         return true;
@@ -44,6 +45,7 @@ public abstract class Command extends org.bukkit.command.Command implements Comm
 
     public abstract List<CommandArgument> getArguments();
     public abstract boolean onExecute(CommandSender sender, String[] args);
+    public abstract void onErrorResponse(String errorMessage);
 
     public Plugin getPlugin() {
         return plugin;

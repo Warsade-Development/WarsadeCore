@@ -2,6 +2,7 @@ package com.warsade.core.command;
 
 import com.warsade.core.command.requirements.RequirementValidator;
 import com.warsade.core.command.requirements.RequirementValidatorResponse;
+import com.warsade.core.utils.Pair;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -25,8 +26,14 @@ public abstract class CommandArgument {
      * Will try to invoke the argument based on the requirements
      * @return true if everything goes well and false if a requirement is not approved
      */
-    public boolean execute(CommandSender sender, String[] args) {
-        if (!checkRequirements(sender, argumentName, args)) return false;
+    public boolean execute(CommandSender sender, String[] args, Command command) {
+        Pair<Boolean, String> requirementsCheckResult = checkRequirements(sender, argumentName, args);
+        boolean meetRequirements = requirementsCheckResult.getFirst();
+        String errorMessage = requirementsCheckResult.getSecond();
+        if (!meetRequirements) {
+            command.onErrorResponse(errorMessage);
+            return false;
+        }
 
         invoke(sender, args);
         return true;
@@ -41,28 +48,31 @@ public abstract class CommandArgument {
      * if the requirement fails with the returned error message
      * from the validator.
      *
-     * @return true if everything goes well and false if a requirement is not approved
+     * @return A [Pair] containing true if everything goes well
+     * and false if a requirement is not approved and
+     * an error message if the command doesn't meet the argument
+     * requirements.
      */
-    private boolean checkRequirements(CommandSender sender, String argument, String[] args) {
+    private Pair<Boolean, String> checkRequirements(CommandSender sender, String argument, String[] args) {
         if (args.length < getArgsSize()) {
-            //sender.sendMessage(messagesConfig.getMessage("help." + argument));
-            return false;
+            return new Pair<>(false, "help." + argument);
         }
 
         boolean meetRequirements = true;
+        String errorMessage = null;
 
         for (RequirementValidator<?> requirement : getValidators()) {
             RequirementValidatorResponse<?> response = requirement.validate(plugin, sender, args);
             if (!response.isSucceeded()) {
                 meetRequirements = false;
-                //sender.sendMessage(messagesConfig.getMessage(response.getErrorMessage()));
+                errorMessage = response.getErrorMessage();
                 break;
             }
 
             setupCommand(requirement, response.getResult());
         }
 
-        return meetRequirements;
+        return new Pair<>(meetRequirements, errorMessage);
     }
 
     /**

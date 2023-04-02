@@ -8,6 +8,10 @@ ext {
     projectVersion = '1.2.0'
 }
 
+shadowJar {
+    archiveFileName.set("${project.name}-${projectVersion}.jar")
+}
+
 group 'com.warsade.core'
 version "${projectVersion}"
 
@@ -28,7 +32,7 @@ publishing {
             artifactId = 'core'
             version = "${projectVersion}"
 
-            artifact("$buildDir/libs/WarsadeCore-$projectVersion-all.jar")
+            artifact("$buildDir/libs/${project.name}-${projectVersion}.jar")
 
             pom {
                 name = 'WarsadeCore'
@@ -54,7 +58,7 @@ afterEvaluate {
                     }
                 }
                 artifact(tasks.shadowJar) {
-                    classifier "${projectVersion}all"
+                    classifier "${projectVersion}"
                 }
             }
         }

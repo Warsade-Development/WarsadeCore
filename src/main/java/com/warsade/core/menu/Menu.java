@@ -5,7 +5,7 @@ import com.warsade.core.menu.slot.MenuSlot;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Map;
+import java.util.HashMap;
 
 public interface Menu <T> {
 
@@ -13,7 +13,7 @@ public interface Menu <T> {
 
     void openInventory(Player player);
     void openInventory(Player player, T data);
-    void openInventory(Player player, Map<String, Object> initialData, T object);
+    void openInventory(Player player, HashMap<String, Object> initialData, T object);
     void closeInventory(Player player);
 
     MenuSlot getSlot(int slot);

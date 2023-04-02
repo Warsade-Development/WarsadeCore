@@ -5,7 +5,7 @@ plugins {
 }
 
 ext {
-    projectVersion = '1.0.0'
+    projectVersion = '1.2.0'
 }
 
 group 'com.warsade.core'
@@ -23,12 +23,40 @@ publishing {
         }
     }
     publications {
-        gpr(MavenPublication) {
+        maven(MavenPublication) {
             groupId = 'com.warsade.core'
             artifactId = 'core'
             version = "${projectVersion}"
 
-            from(components.java)
+            artifact("$buildDir/libs/WarsadeCore-$projectVersion-all.jar")
+
+            pom {
+                name = 'WarsadeCore'
+                description = 'A library for Warsade plugins'
+                url = 'https://github.com/Warsade-Development/WarsadeCore/'
+            }
+        }
+    }
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            def sourceJar = this.getTasks().register("sourceJar", Jar) {
+                archiveClassifier.set("sources")
+                from(sourceSets.main.allSource)
+            }
+            maven {
+                artifacts {
+                    archives jar
+                    artifact(sourceJar.get()) {
+                        classifier "sources"
+                    }
+                }
+                artifact(tasks.shadowJar) {
+                    classifier "${projectVersion}all"
+                }
+            }
         }
     }
 }

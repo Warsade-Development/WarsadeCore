@@ -3,10 +3,7 @@ package com.warsade.core.database.impl;
 import com.warsade.core.database.Database;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class SQLiteDatabaseImpl implements Database {
 
@@ -44,6 +41,19 @@ public class SQLiteDatabaseImpl implements Database {
             Connection connection = database.openConnection();
             PreparedStatement statement = prepareStatement(connection, sql);
             return action.apply(statement);
+        } catch (SQLException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    @Override
+    public void executeSQLQuery(String sql, SQLConsumer<ResultSet> action) {
+        try (Database database = this) {
+            Connection connection = database.openConnection();
+            PreparedStatement statement = prepareStatement(connection, sql);
+            ResultSet resultSet = statement.executeQuery();
+
+            action.accept(resultSet);
         } catch (SQLException exception) {
             throw new RuntimeException(exception);
         }

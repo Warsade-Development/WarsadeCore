@@ -7,6 +7,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class MySQLDatabaseImpl implements Database {
@@ -43,6 +44,18 @@ public class MySQLDatabaseImpl implements Database {
         try (Connection connection = getConnection()) {
             PreparedStatement statement = prepareStatement(connection, sql);
             return action.apply(statement);
+        } catch (SQLException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    @Override
+    public void executeSQLQuery(String sql, SQLConsumer<ResultSet> action) {
+        try (Connection connection = getConnection()) {
+            PreparedStatement statement = prepareStatement(connection, sql);
+            ResultSet resultSet = statement.executeQuery();
+
+            action.accept(resultSet);
         } catch (SQLException exception) {
             throw new RuntimeException(exception);
         }

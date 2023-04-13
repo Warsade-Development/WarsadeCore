@@ -1,5 +1,6 @@
 package com.warsade.core.database;
 
+import com.warsade.core.database.impl.SQLConsumer;
 import com.warsade.core.database.impl.SQLFunction;
 
 import java.io.Closeable;
@@ -27,6 +28,7 @@ public interface Database extends Closeable {
     }
 
     <T> T executeSQL(String sql, SQLFunction<T> action);
+    void executeSQLQuery(String sql, SQLConsumer<ResultSet> action);
 
     default PreparedStatement prepareStatement(Connection connection, String sql) throws SQLException {
         return connection.prepareStatement(sql);
@@ -40,6 +42,10 @@ public interface Database extends Closeable {
     }
     default ResultSet executeQuery(String sql) {
         return executeSQL(sql, PreparedStatement::executeQuery);
+    }
+
+    default void executeQuery(String sql, SQLConsumer<ResultSet> action) {
+        executeSQLQuery(sql, action);
     }
 
     default boolean isConnected() {

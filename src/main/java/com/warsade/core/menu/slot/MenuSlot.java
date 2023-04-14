@@ -4,11 +4,13 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.function.Consumer;
 
-public interface MenuSlot {
+public interface MenuSlot<T> {
 
     int getSlot();
     ItemStack getItem();
 
-    Consumer<MenuSlotClick> getClickAction();
+    T getData();
+
+    Consumer<MenuSlotClick<T>> getClickAction();
 
 }

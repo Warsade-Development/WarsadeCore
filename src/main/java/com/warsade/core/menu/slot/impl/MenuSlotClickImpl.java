@@ -1,19 +1,28 @@
 package com.warsade.core.menu.slot.impl;
 
+import com.warsade.core.menu.slot.MenuSlot;
 import com.warsade.core.menu.slot.MenuSlotClick;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class MenuSlotClickImpl implements MenuSlotClick {
+public class MenuSlotClickImpl<T> implements MenuSlotClick<T> {
+
+    MenuSlot<T> menuSlot;
 
     Player player;
     ItemStack itemStack;
     int slot;
 
-    public MenuSlotClickImpl(Player player, ItemStack itemStack, int slot) {
+    public MenuSlotClickImpl(MenuSlot<T> menuSlot, Player player, ItemStack itemStack, int slot) {
+        this.menuSlot = menuSlot;
         this.player = player;
         this.itemStack = itemStack;
         this.slot = slot;
+    }
+
+    @Override
+    public MenuSlot<T> getMenuSlot() {
+        return menuSlot;
     }
 
     @Override

@@ -6,16 +6,23 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.function.Consumer;
 
-public class MenuSlotImpl implements MenuSlot {
+public class MenuSlotImpl<T> implements MenuSlot<T> {
 
     int slot;
     ItemStack itemStack;
 
-    Consumer<MenuSlotClick> clickAction;
+    T data;
 
-    public MenuSlotImpl(int slot, ItemStack itemStack, Consumer<MenuSlotClick> clickAction) {
+    Consumer<MenuSlotClick<T>> clickAction;
+
+    public MenuSlotImpl(int slot, ItemStack itemStack, Consumer<MenuSlotClick<T>> clickAction) {
+        this(slot, itemStack, null, clickAction);
+    }
+
+    public MenuSlotImpl(int slot, ItemStack itemStack, T data, Consumer<MenuSlotClick<T>> clickAction) {
         this.slot = slot;
         this.itemStack = itemStack;
+        this.data = data;
         this.clickAction = clickAction;
     }
 
@@ -30,7 +37,12 @@ public class MenuSlotImpl implements MenuSlot {
     }
 
     @Override
-    public Consumer<MenuSlotClick> getClickAction() {
+    public T getData() {
+        return data;
+    }
+
+    @Override
+    public Consumer<MenuSlotClick<T>> getClickAction() {
         return clickAction;
     }
 

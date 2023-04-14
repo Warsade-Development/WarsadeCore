@@ -3,7 +3,7 @@ package com.warsade.core.menu;
 import com.warsade.core.CorePlugin;
 import com.warsade.core.config.providers.MenuConfig;
 import com.warsade.core.menu.context.MenuContext;
-import com.warsade.core.menu.context.MenuContextImpl;
+import com.warsade.core.menu.context.PaginatedMenuContext;
 import com.warsade.core.menu.slot.MenuSlot;
 import com.warsade.core.menu.slot.MenuSlotClick;
 import com.warsade.core.menu.slot.impl.MenuSlotClickImpl;
@@ -17,6 +17,8 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public abstract class PaginatedMenu<T, K> extends PaginatedView<T> implements Menu<K> {
+
+    static HashMap<UUID, MenuContext> menuContexts = new HashMap<>();
 
     MenuConfig menuConfig;
 
@@ -84,38 +86,43 @@ public abstract class PaginatedMenu<T, K> extends PaginatedView<T> implements Me
     public abstract void onClose(Player player);
 
     @Override
-    public MenuSlot getSlot(int slot) {
-        ViewItem viewItem = slot(slot);
-
-        if (viewItem.getItem() == null) return null;
-        else return new MenuSlotImpl(slot, (ItemStack) viewItem.getItem(), null);
+    protected void onClose(@NotNull ViewContext context) {
+        super.onClose(context);
+        menuContexts.remove(context.getPlayer().getUniqueId());
     }
 
     @Override
-    public MenuSlot getSlotByItemStack(ItemStack itemStack) {
-        ViewItem viewItem = Arrays.stream(getItems()).filter(item -> item.getItem() == itemStack).findFirst().orElse(null);
+    public MenuContext getMenuContextByPlayer(Player player) {
+        if (menuContexts.containsKey(player.getUniqueId())) return getMenuContexts().get(player.getUniqueId());
 
-        if (viewItem == null) return null;
-        else return new MenuSlotImpl(viewItem.getSlot(), (ItemStack) viewItem.getItem(), null);
+        ViewContext playerViewContext = getContexts().stream().filter(viewContext -> viewContext.getPlayer().getUniqueId().equals(player.getUniqueId())).findFirst().orElse(null);
+        if (playerViewContext != null) {
+            return new PaginatedMenuContext(playerViewContext);
+        } else {
+            return null;
+        }
     }
 
+    /**
+     * Add a new item to this menu
+     * @deprecated
+     * This method has been moved to {@link MenuContext#attachSlot(MenuSlot)}
+     */
     @Override
-    public void attachSlot(MenuSlot menuSlot, MenuContext menuContext) {
-        ViewContext viewContext = menuContext.getViewContext();
-        viewContext.slot(menuSlot.getSlot(), menuSlot.getItem()).onClick(viewSlotClickContext -> {
-            MenuSlotClick menuSlotClick = new MenuSlotClickImpl(viewSlotClickContext.getPlayer(), viewSlotClickContext.getItemWrapper().asBukkitItem(), viewSlotClickContext.getSlot());
-            if (menuSlot.getClickAction() != null) menuSlot.getClickAction().accept(menuSlotClick);
-        });
+    public void attachSlot(MenuSlot<K> menuSlot, MenuContext menuContext) {
+        menuContext.attachSlot(menuSlot);
     }
 
     @Override
     protected void onRender(@NotNull ViewContext viewContext) {
         super.onRender(viewContext);
         K data = viewContext.get("object");
-        Consumer<MenuContext> menuContextConsumer = onOpen(viewContext.getPlayer(), data);
+        MenuContext menuContext = new PaginatedMenuContext(viewContext);
 
         viewContext.paginated().setSource(getItems(viewContext.getPlayer(), data));
-        menuContextConsumer.accept(new MenuContextImpl(viewContext));
+        onOpen(viewContext.getPlayer(), data).accept(menuContext);
+
+        menuContexts.put(viewContext.getPlayer().getUniqueId(), menuContext);
     }
 
     @Override
@@ -123,16 +130,23 @@ public abstract class PaginatedMenu<T, K> extends PaginatedView<T> implements Me
         viewItem.withItem(value)
                 .onRender(render -> render.setItem(getViewItemStack(value)))
                 .onClick(viewSlotClickContext -> {
-                    MenuSlotClick menuSlotClick = new MenuSlotClickImpl(viewSlotClickContext.getPlayer(), viewSlotClickContext.getCurrentItem().asBukkitItem(), viewSlotClickContext.getSlot());
+                    MenuSlot<T> menuSlot = new MenuSlotImpl<>(viewSlotClickContext.getSlot(), viewSlotClickContext.getCurrentItem().asBukkitItem(), value, null);
+                    MenuSlotClick<T> menuSlotClick = new MenuSlotClickImpl<>(menuSlot, viewSlotClickContext.getPlayer(), viewSlotClickContext.getCurrentItem().asBukkitItem(), viewSlotClickContext.getSlot());
+
                     onItemClick(menuSlotClick);
                 });
     }
 
     public abstract ItemStack getViewItemStack(T value);
-    public abstract void onItemClick(MenuSlotClick onClick);
+    public abstract void onItemClick(MenuSlotClick<T> onClick);
 
     public MenuConfig getMenuConfig() {
         return menuConfig;
+    }
+
+    @Override
+    public HashMap<UUID, MenuContext> getMenuContexts() {
+        return menuContexts;
     }
 
 }

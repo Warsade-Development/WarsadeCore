@@ -3,11 +3,11 @@ package com.warsade.core.menu;
 import com.warsade.core.menu.context.MenuContext;
 import com.warsade.core.menu.slot.MenuSlot;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
+import java.util.UUID;
 
-public interface Menu <T> {
+public interface Menu<T> {
 
     String getInventoryTitle();
 
@@ -16,9 +16,16 @@ public interface Menu <T> {
     void openInventory(Player player, HashMap<String, Object> initialData, T object);
     void closeInventory(Player player);
 
-    MenuSlot getSlot(int slot);
-    MenuSlot getSlotByItemStack(ItemStack itemStack);
+    MenuContext getMenuContextByPlayer(Player player);
 
-    void attachSlot(MenuSlot menuSlot, MenuContext menuContext);
+    /**
+     * Add a new item to this menu
+     * @deprecated
+     * This method has been moved to {@link MenuContext#attachSlot(MenuSlot)}
+    */
+    @Deprecated
+    void attachSlot(MenuSlot<T> menuSlot, MenuContext menuContext);
+
+    HashMap<UUID, MenuContext> getMenuContexts();
 
 }

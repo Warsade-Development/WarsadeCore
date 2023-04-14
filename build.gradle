@@ -5,7 +5,7 @@ plugins {
 }
 
 ext {
-    projectVersion = '1.2.1'
+    projectVersion = '1.2.2'
 }
 
 shadowJar {

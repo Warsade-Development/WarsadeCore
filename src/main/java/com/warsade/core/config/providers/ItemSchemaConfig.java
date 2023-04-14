@@ -60,24 +60,48 @@ public class ItemSchemaConfig {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public List<String> getLore() {
         return lore;
+    }
+
+    public void setLore(List<String> lore) {
+        this.lore = lore;
     }
 
     public String getId() {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public int getData() {
         return data;
+    }
+
+    public void setData(int data) {
+        this.data = data;
     }
 
     public boolean isGlow() {
         return glow;
     }
 
+    public void setGlow(boolean glow) {
+        this.glow = glow;
+    }
+
     public int getSlot() {
         return slot;
+    }
+
+    public void setSlot(int slot) {
+        this.slot = slot;
     }
 
     public static ItemSchemaConfig buildItemSchemaByConfig(String path, String key, FileConfiguration config) {

@@ -107,12 +107,24 @@ public class ItemSchemaConfig {
     public static ItemSchemaConfig buildItemSchemaByConfig(String path, String key, FileConfiguration config) {
         return new ItemSchemaConfig(
                 key,
-                config.getString(path + ".name"),
+                config.getString(path + ".name", ""),
                 config.getStringList(path + ".lore"),
-                config.getString(path + ".id"),
-                config.getInt(path + ".data"),
+                config.getString(path + ".id", ""),
+                config.getInt(path + ".data", 0),
                 config.getBoolean(path + ".glow", false),
                 config.getInt(path + ".slot", 0)
+        );
+    }
+
+    public static ItemSchemaConfig createCopyOf(ItemSchemaConfig other) {
+        return new ItemSchemaConfig(
+                other.getKey(),
+                other.getName(),
+                other.getLore(),
+                other.getId(),
+                other.getData(),
+                other.isGlow(),
+                other.getSlot()
         );
     }
 

@@ -28,6 +28,15 @@ public abstract class NormalMenu <T> extends View implements Menu<T> {
         setCancelOnClick(true);
 
         this.menuConfig = menuConfig;
+
+        if (menuConfig.hasLayout()) {
+            menuConfig.getMenuLayout().getPlaceholdersItems().forEach(placeholderItem -> {
+                setLayout(placeholderItem.getKey().toUpperCase().charAt(0), onRenderItem -> {
+                    onRenderItem.setItem(placeholderItem.toItemStack());
+                });
+            });
+            setLayout(menuConfig.getMenuLayout().getValue());
+        }
     }
 
     @Override
@@ -76,6 +85,7 @@ public abstract class NormalMenu <T> extends View implements Menu<T> {
     @Override
     protected void onRender(@NotNull ViewContext context) {
         super.onRender(context);
+
         setupInventory(context);
     }
 

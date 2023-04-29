@@ -24,13 +24,19 @@ public abstract class PaginatedMenu<T, K> extends PaginatedView<T> implements Me
 
     public PaginatedMenu() {}
 
-    public PaginatedMenu(MenuConfig menuConfig, String... layout) {
-        super(6, menuConfig.getName());
+    public PaginatedMenu(MenuConfig menuConfig) {
+        super(menuConfig.getRows(), menuConfig.getName());
         setCancelOnClick(true);
 
         this.menuConfig = menuConfig;
 
-        setLayout(layout);
+        menuConfig.getMenuLayout().getPlaceholdersItems().forEach(placeholderItem -> {
+            setLayout(placeholderItem.getKey().toUpperCase().charAt(0), onRenderItem -> {
+                onRenderItem.setItem(placeholderItem.toItemStack());
+            });
+        });
+        setLayout(menuConfig.getMenuLayout().getValue());
+
         setPreviousPageItem((context, viewItem) -> {
             if (!context.hasPreviousPage()) return;
 
@@ -116,6 +122,11 @@ public abstract class PaginatedMenu<T, K> extends PaginatedView<T> implements Me
     @Override
     protected void onRender(@NotNull ViewContext viewContext) {
         super.onRender(viewContext);
+
+        setupMenu(viewContext);
+    }
+
+    private void setupMenu(ViewContext viewContext) {
         K data = viewContext.get("object");
         MenuContext menuContext = new PaginatedMenuContext(viewContext);
 

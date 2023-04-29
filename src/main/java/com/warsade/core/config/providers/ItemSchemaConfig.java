@@ -14,6 +14,7 @@ import java.util.List;
 public class ItemSchemaConfig {
 
     String key;
+    boolean useCustomNameAndLore;
     String name;
     List<String> lore;
     String id;
@@ -21,12 +22,13 @@ public class ItemSchemaConfig {
     boolean glow;
     int slot;
 
-    public ItemSchemaConfig(String key, String name, List<String> lore, String id, int data, boolean glow) {
-        this(key, name, lore, id, data, glow, 0);
+    public ItemSchemaConfig(String key, boolean useCustomNameAndLore, String name, List<String> lore, String id, int data, boolean glow) {
+        this(key, useCustomNameAndLore, name, lore, id, data, glow, 0);
     }
 
-    public ItemSchemaConfig(String key, String name, List<String> lore, String id, int data, boolean glow, int slot) {
+    public ItemSchemaConfig(String key, boolean useCustomNameAndLore, String name, List<String> lore, String id, int data, boolean glow, int slot) {
         this.key = key;
+        this.useCustomNameAndLore = useCustomNameAndLore;
         this.name = name;
         this.lore = lore;
         this.id = id;
@@ -54,6 +56,10 @@ public class ItemSchemaConfig {
 
     public String getKey() {
         return key;
+    }
+
+    public boolean isUseCustomNameAndLore() {
+        return useCustomNameAndLore;
     }
 
     public String getName() {
@@ -107,6 +113,7 @@ public class ItemSchemaConfig {
     public static ItemSchemaConfig buildItemSchemaByConfig(String path, String key, FileConfiguration config) {
         return new ItemSchemaConfig(
                 key,
+                config.getBoolean(path + ".useCustomNameAndLore", true),
                 config.getString(path + ".name", ""),
                 config.getStringList(path + ".lore"),
                 config.getString(path + ".id", ""),
@@ -119,6 +126,7 @@ public class ItemSchemaConfig {
     public static ItemSchemaConfig createCopyOf(ItemSchemaConfig other) {
         return new ItemSchemaConfig(
                 other.getKey(),
+                other.isUseCustomNameAndLore(),
                 other.getName(),
                 other.getLore(),
                 other.getId(),

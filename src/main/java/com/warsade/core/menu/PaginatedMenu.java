@@ -4,6 +4,7 @@ import com.warsade.core.CorePlugin;
 import com.warsade.core.config.providers.MenuConfig;
 import com.warsade.core.menu.context.MenuContext;
 import com.warsade.core.menu.context.PaginatedMenuContext;
+import com.warsade.core.menu.context.PreOpenMenuContext;
 import com.warsade.core.menu.slot.MenuSlot;
 import com.warsade.core.menu.slot.MenuSlotClick;
 import com.warsade.core.menu.slot.impl.MenuSlotClickImpl;
@@ -89,6 +90,9 @@ public abstract class PaginatedMenu<T, K> extends PaginatedView<T> implements Me
         });
     }
 
+    public Consumer<PreOpenMenuContext> onPreOpen(Player player, K data) {
+        return preOpenMenuContext -> {};
+    }
     public abstract Consumer<MenuContext> onOpen(Player player, K data);
     public abstract void onClose(Player player);
 
@@ -118,6 +122,19 @@ public abstract class PaginatedMenu<T, K> extends PaginatedView<T> implements Me
     @Override
     public void attachSlot(MenuSlot<K> menuSlot, MenuContext menuContext) {
         menuContext.attachSlot(menuSlot);
+    }
+
+    @Override
+    protected void onOpen(@NotNull OpenViewContext context) {
+        super.onOpen(context);
+
+        K data = context.get("object");
+        PreOpenMenuContext preOpenMenuContext = new PreOpenMenuContext(menuConfig);
+
+        onPreOpen(context.getPlayer(), data).accept(preOpenMenuContext);
+
+        context.setContainerTitle(preOpenMenuContext.getInventoryTitle());
+        context.setContainerSize(menuConfig.getRows());
     }
 
     @Override

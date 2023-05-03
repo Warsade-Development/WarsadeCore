@@ -4,8 +4,10 @@ import com.warsade.core.CorePlugin;
 import com.warsade.core.config.providers.MenuConfig;
 import com.warsade.core.menu.context.MenuContext;
 import com.warsade.core.menu.context.NormalMenuContext;
+import com.warsade.core.menu.context.PreOpenMenuContext;
 import com.warsade.core.menu.slot.MenuSlot;
 import me.saiintbrisson.minecraft.AbstractView;
+import me.saiintbrisson.minecraft.OpenViewContext;
 import me.saiintbrisson.minecraft.View;
 import me.saiintbrisson.minecraft.ViewContext;
 import org.bukkit.entity.Player;
@@ -73,6 +75,9 @@ public abstract class NormalMenu <T> extends View implements Menu<T> {
         });
     }
 
+    public Consumer<PreOpenMenuContext> onPreOpen(Player player, T data) {
+        return preOpenMenuContext -> {};
+    }
     public abstract Consumer<MenuContext> onOpen(Player player, T data);
     public abstract void onClose(Player player);
 
@@ -80,6 +85,19 @@ public abstract class NormalMenu <T> extends View implements Menu<T> {
     protected void onClose(@NotNull ViewContext context) {
         super.onClose(context);
         menuContexts.remove(context.getPlayer().getUniqueId());
+    }
+
+    @Override
+    protected void onOpen(@NotNull OpenViewContext context) {
+        super.onOpen(context);
+
+        T data = context.get("object");
+        PreOpenMenuContext preOpenMenuContext = new PreOpenMenuContext(menuConfig);
+
+        onPreOpen(context.getPlayer(), data).accept(preOpenMenuContext);
+
+        context.setContainerTitle(preOpenMenuContext.getInventoryTitle());
+        context.setContainerSize(menuConfig.getRows());
     }
 
     @Override

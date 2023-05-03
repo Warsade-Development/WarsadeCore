@@ -20,13 +20,14 @@ public class ItemSchemaConfig {
     String id;
     int data;
     boolean glow;
+    int amount;
     int slot;
 
-    public ItemSchemaConfig(String key, boolean useCustomNameAndLore, String name, List<String> lore, String id, int data, boolean glow) {
-        this(key, useCustomNameAndLore, name, lore, id, data, glow, 0);
+    public ItemSchemaConfig(String key, boolean useCustomNameAndLore, String name, List<String> lore, String id, int data, boolean glow, int amount) {
+        this(key, useCustomNameAndLore, name, lore, id, data, glow, 0, amount);
     }
 
-    public ItemSchemaConfig(String key, boolean useCustomNameAndLore, String name, List<String> lore, String id, int data, boolean glow, int slot) {
+    public ItemSchemaConfig(String key, boolean useCustomNameAndLore, String name, List<String> lore, String id, int data, boolean glow, int amount, int slot) {
         this.key = key;
         this.useCustomNameAndLore = useCustomNameAndLore;
         this.name = name;
@@ -34,15 +35,22 @@ public class ItemSchemaConfig {
         this.id = id;
         this.data = data;
         this.glow = glow;
+        this.amount = amount;
         this.slot = slot;
     }
 
     public ItemStack toItemStack() {
-        ItemStack item = new ItemBuilder(Material.getMaterial(id)).setDurability(data)
-                .setName(MessageUtils.replaceColor(name))
-                .setLore(MessageUtils.replaceColor(lore))
-                .build();
+        ItemBuilder itemBuilder = new ItemBuilder(Material.getMaterial(id));
+        itemBuilder.setDurability(data);
 
+        if (isUseCustomNameAndLore()) {
+            itemBuilder.setName(MessageUtils.replaceColor(name));
+            itemBuilder.setLore(MessageUtils.replaceColor(lore));
+        }
+
+        itemBuilder.setAmount(amount);
+
+        ItemStack item = itemBuilder.build();
         if (glow) {
             item.addUnsafeEnchantment(Enchantment.WATER_WORKER, 1);
 
@@ -102,6 +110,14 @@ public class ItemSchemaConfig {
         this.glow = glow;
     }
 
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
+
     public int getSlot() {
         return slot;
     }
@@ -119,6 +135,7 @@ public class ItemSchemaConfig {
                 config.getString(path + ".id", ""),
                 config.getInt(path + ".data", 0),
                 config.getBoolean(path + ".glow", false),
+                config.getInt(path + ".amount", 1),
                 config.getInt(path + ".slot", 0)
         );
     }
@@ -132,6 +149,7 @@ public class ItemSchemaConfig {
                 other.getId(),
                 other.getData(),
                 other.isGlow(),
+                other.getAmount(),
                 other.getSlot()
         );
     }

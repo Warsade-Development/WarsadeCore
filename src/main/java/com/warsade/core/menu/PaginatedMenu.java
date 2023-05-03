@@ -10,6 +10,7 @@ import com.warsade.core.menu.slot.impl.MenuSlotClickImpl;
 import com.warsade.core.menu.slot.impl.MenuSlotImpl;
 import me.saiintbrisson.minecraft.*;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -142,7 +143,7 @@ public abstract class PaginatedMenu<T, K> extends PaginatedView<T> implements Me
                 .onRender(render -> render.setItem(getViewItemStack(value)))
                 .onClick(viewSlotClickContext -> {
                     MenuSlot<T> menuSlot = new MenuSlotImpl<>(viewSlotClickContext.getSlot(), viewSlotClickContext.getCurrentItem().asBukkitItem(), value, null);
-                    MenuSlotClick<T> menuSlotClick = new MenuSlotClickImpl<>(menuSlot, viewSlotClickContext.getPlayer(), viewSlotClickContext.getCurrentItem().asBukkitItem(), viewSlotClickContext.getSlot());
+                    MenuSlotClick<T> menuSlotClick = new MenuSlotClickImpl<>(menuSlot, ClickType.valueOf(viewSlotClickContext.getClickIdentifier()), viewSlotClickContext.getPlayer(), viewSlotClickContext.getCurrentItem().asBukkitItem(), viewSlotClickContext.getSlot());
 
                     onItemClick(menuSlotClick);
                 });

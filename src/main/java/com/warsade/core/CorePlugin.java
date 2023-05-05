@@ -5,6 +5,7 @@ import com.warsade.core.menu.registry.MenuRegistry;
 import com.warsade.core.plugin.PluginRegistry;
 import me.saiintbrisson.minecraft.AbstractView;
 import me.saiintbrisson.minecraft.ViewFrame;
+import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
@@ -14,6 +15,8 @@ public abstract class CorePlugin extends JavaPlugin {
 
     private static final PluginRegistry pluginRegistry = new PluginRegistry();
     private static final MenuRegistry menuRegistry = new MenuRegistry();
+
+    Material pluginIcon = Material.PAPER;
 
     @Override
     public void onEnable() {
@@ -60,6 +63,14 @@ public abstract class CorePlugin extends JavaPlugin {
 
     public static List<CorePlugin> getPlugins() {
         return pluginRegistry.getPlugins();
+    }
+
+    public Material getPluginIcon() {
+        return pluginIcon;
+    }
+
+    public void setPluginIcon(Material pluginIcon) {
+        this.pluginIcon = pluginIcon;
     }
 
 }

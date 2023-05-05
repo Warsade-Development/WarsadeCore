@@ -1,0 +1,25 @@
+Menus:
+  plugins:
+    name: "&aWarsade plugins"
+    rows: 4
+    layout:
+      value:
+        - "XXXXXXXXX"
+        - "XXOOOOOXX"
+        - "XXOOOOOXX"
+        - "XXX<X>XXX"
+    items:
+      previous:
+        name: "&a<----"
+        lore:
+          - ""
+        id: "STONE"
+        data: 0
+        glow: false
+      next:
+        name: "&a---->"
+        lore:
+          - ""
+        id: "STONE"
+        data: 0
+        glow: false

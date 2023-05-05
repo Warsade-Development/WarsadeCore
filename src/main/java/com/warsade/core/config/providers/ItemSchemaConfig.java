@@ -5,12 +5,31 @@ import com.warsade.core.utils.MessageUtils;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
 
+/**
+ * Item configuration example:
+ *
+ * itemKey:
+ *    useCustomNameAndLore: true
+ *    name: "&aItem name"
+ *    lore:
+ *      - "&fItem lore"
+ *    id: "STONE"
+ *    data: 0
+ *    # enchantment:level
+ *    enchantments:
+ *        - "sharpness:1"
+ *    glow: false
+ *    amount: 1
+ *    slot: 5
+ *
+ */
 public class ItemSchemaConfig {
 
     String key;
@@ -19,21 +38,23 @@ public class ItemSchemaConfig {
     List<String> lore;
     String id;
     int data;
+    List<String> enchantments;
     boolean glow;
     int amount;
     int slot;
 
-    public ItemSchemaConfig(String key, boolean useCustomNameAndLore, String name, List<String> lore, String id, int data, boolean glow, int amount) {
-        this(key, useCustomNameAndLore, name, lore, id, data, glow, 0, amount);
+    public ItemSchemaConfig(String key, boolean useCustomNameAndLore, String name, List<String> lore, String id, int data, List<String> enchantments, boolean glow, int amount) {
+        this(key, useCustomNameAndLore, name, lore, id, data, enchantments, glow, 0, amount);
     }
 
-    public ItemSchemaConfig(String key, boolean useCustomNameAndLore, String name, List<String> lore, String id, int data, boolean glow, int amount, int slot) {
+    public ItemSchemaConfig(String key, boolean useCustomNameAndLore, String name, List<String> lore, String id, int data, List<String> enchantments, boolean glow, int amount, int slot) {
         this.key = key;
         this.useCustomNameAndLore = useCustomNameAndLore;
         this.name = name;
         this.lore = lore;
         this.id = id;
         this.data = data;
+        this.enchantments = enchantments;
         this.glow = glow;
         this.amount = amount;
         this.slot = slot;
@@ -47,11 +68,21 @@ public class ItemSchemaConfig {
             itemBuilder.setName(MessageUtils.replaceColor(name));
             itemBuilder.setLore(MessageUtils.replaceColor(lore));
         }
+        if (!enchantments.isEmpty()) {
+            for (String selected : enchantments) {
+                String[] input = selected.split(":");
+                String enchantmentName = input[0];
+                int level = Integer.parseInt(input[1]);
+
+                Enchantment enchantment = EnchantmentWrapper.getByName(enchantmentName);
+                if (enchantment != null) itemBuilder.addUnsafeEnchantment(enchantment, level);
+            }
+        }
 
         itemBuilder.setAmount(amount);
 
         ItemStack item = itemBuilder.build();
-        if (glow) {
+        if (glow && enchantments.isEmpty()) {
             item.addUnsafeEnchantment(Enchantment.WATER_WORKER, 1);
 
             ItemMeta meta = item.getItemMeta();
@@ -68,6 +99,10 @@ public class ItemSchemaConfig {
 
     public boolean isUseCustomNameAndLore() {
         return useCustomNameAndLore;
+    }
+
+    public void setUseCustomNameAndLore(boolean useCustomNameAndLore) {
+        this.useCustomNameAndLore = useCustomNameAndLore;
     }
 
     public String getName() {
@@ -102,6 +137,14 @@ public class ItemSchemaConfig {
         this.data = data;
     }
 
+    public List<String> getEnchantments() {
+        return enchantments;
+    }
+
+    public void setEnchantments(List<String> enchantments) {
+        this.enchantments = enchantments;
+    }
+
     public boolean isGlow() {
         return glow;
     }
@@ -134,6 +177,7 @@ public class ItemSchemaConfig {
                 config.getStringList(path + ".lore"),
                 config.getString(path + ".id", ""),
                 config.getInt(path + ".data", 0),
+                config.getStringList(path + ".enchantments"),
                 config.getBoolean(path + ".glow", false),
                 config.getInt(path + ".amount", 1),
                 config.getInt(path + ".slot", 0)
@@ -148,6 +192,7 @@ public class ItemSchemaConfig {
                 other.getLore(),
                 other.getId(),
                 other.getData(),
+                other.getEnchantments(),
                 other.isGlow(),
                 other.getAmount(),
                 other.getSlot()

@@ -28,6 +28,18 @@ public abstract class MenuContext {
         return viewContext.get("object");
     }
 
+    public <T> void setData(String name, T data) {
+        viewContext.set(name, data);
+    }
+
+    public void removeData(String dataName) {
+        viewContext.remove(dataName);
+    }
+
+    public boolean hasData(String dataName) {
+        return viewContext.has(dataName);
+    }
+
     public <T> T getData(String dataName) {
         return viewContext.get(dataName);
     }

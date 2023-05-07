@@ -1,6 +1,8 @@
 package com.warsade.core;
 
 import com.warsade.core.bukkit.commands.CoreCommand;
+import com.warsade.core.bukkit.events.CustomMenusCommandListener;
+import com.warsade.core.bukkit.view.CustomMenu;
 import com.warsade.core.bukkit.view.PluginsMenu;
 import com.warsade.core.config.Config;
 import com.warsade.core.config.providers.MenuConfig;
@@ -19,6 +21,7 @@ public class Core extends CorePlugin {
 
         setPluginIcon(Material.BEDROCK);
         registerMenus(new PluginsMenu(new MenuConfig(settings, "plugins")));
+        registerMenus(new CustomMenu(new MenuConfig("null", "custom menu", 1), this));
 
         getLogger().info("Core plugin enabled");
     }
@@ -45,9 +48,19 @@ public class Core extends CorePlugin {
     }
 
     @Override
+    public void registerListeners() {
+        super.registerListeners();
+        getServer().getPluginManager().registerEvents(new CustomMenusCommandListener(this), this);
+    }
+
+    @Override
     public void registerCommands() {
         super.registerCommands();
         getCommand("core").setExecutor(new CoreCommand(this));
+    }
+
+    public Config getSettings() {
+        return settings;
     }
 
 }

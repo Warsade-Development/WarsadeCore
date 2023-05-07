@@ -1,3 +1,5 @@
+version: 1.4.1
+
 Menus:
   plugins:
     name: "&aWarsade plugins"
@@ -23,3 +25,20 @@ Menus:
         id: "STONE"
         data: 0
         glow: false
+
+CustomMenus:
+  items:
+    command: "citems" # command to open this menu: /citems
+    name: "&aItems info"
+    rows: 1
+    items:
+      supersword:
+        name: "&aSuper sword"
+        lore:
+          - "idk how to get this sword, just play the game"
+        id: "DIAMOND_SWORD"
+        data: 0
+        glow: false
+        slot: 1
+        # if you want, you can add openAnotherMenu: "menu" to open another custom menu on click
+        # openAnotherMenu: "menu"

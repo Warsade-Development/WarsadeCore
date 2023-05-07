@@ -11,6 +11,8 @@ import java.util.List;
 
 public class MenuConfig {
 
+    String path;
+
     String name;
     int rows;
     MenuLayout menuLayout = null;
@@ -28,6 +30,7 @@ public class MenuConfig {
     }
 
     public MenuConfig(FileConfiguration configuration, String path) {
+        this.path = path;
         this.name = MessageUtils.replaceColor(configuration.getString(path + ".name"));
         this.rows = configuration.getInt(path + ".rows");
         this.configuration = configuration;
@@ -38,6 +41,16 @@ public class MenuConfig {
         }
 
         if (configuration.contains(path + ".layout")) menuLayout = new MenuLayout(path, this, configuration);
+    }
+
+    public MenuConfig(String path, String name, int rows) {
+        this.path = path;
+        this.name = name;
+        this.rows = rows;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public String getName() {

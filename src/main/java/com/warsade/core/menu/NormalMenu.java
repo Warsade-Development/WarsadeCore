@@ -97,7 +97,7 @@ public abstract class NormalMenu <T> extends View implements Menu<T> {
         onPreOpen(context.getPlayer(), data).accept(preOpenMenuContext);
 
         context.setContainerTitle(preOpenMenuContext.getInventoryTitle());
-        context.setContainerSize(menuConfig.getRows());
+        context.setContainerSize(preOpenMenuContext.getInventoryRows());
     }
 
     @Override

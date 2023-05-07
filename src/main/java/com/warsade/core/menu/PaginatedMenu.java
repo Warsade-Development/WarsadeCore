@@ -134,7 +134,7 @@ public abstract class PaginatedMenu<T, K> extends PaginatedView<T> implements Me
         onPreOpen(context.getPlayer(), data).accept(preOpenMenuContext);
 
         context.setContainerTitle(preOpenMenuContext.getInventoryTitle());
-        context.setContainerSize(menuConfig.getRows());
+        context.setContainerSize(preOpenMenuContext.getInventoryRows());
     }
 
     @Override
